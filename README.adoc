@@ -1,0 +1,37 @@
+= Advanced OpenShift Development ILT Homework Grading
+
+This repository contains the scripts that students can use to validate that their homework assignment will pass.
+
+The automatic grading process requires a public student repository on a custom Gogs installation on the OpenTLC Shared Cluster. This repository will be used to automatically create everything else.
+
+The name of the Gogs project should be `$GUID-gogs` where $GUID can be freely chosen by the student.
+
+== Student Repository Structure
+
+The following structure is required for student repositories.
+
+* *Organization*: AppDevHomework
+* *Access Credentials* for all repository should be `parks` for the user id and `r3dh4t1!` for the password.
+* In this organization there are *four private repositories*:
+** *Nationalparks*: Holds the code for the Nationalparks micro service
+** *MLBParks*: Holds the code for the MLBParks micro service
+** *Parksmap*: Holds the code for the Parksmap micro service
+** *Infrastructure*: Holds the infrastructure code to set up the project. This repository contains two subdirectories:
+. *templates*: Holds templates for the infrastructure and optionally the micro services
+. *bin*: Holds shell scripts that when executed will set up the environment. The scripts will need to leverage the templates in the *templates* folder and the OpenShift CLI or Ansible Playbooks to set up these components. It is expected that each script sets up the components completely.
+.. *bin/setup_nexus.sh*: Creates a Nexus server including Docker Registry in project `$GUID-nexus` where $GUID is the first parameter to the script.
+.. *bin/setup_sonar.sh*: Creates a full Sonarqube server including PostgreSQL database in project `$GUID-sonarqube` where $GUID is the first parameter to the script.
+.. *bin/setup_jenkins.sh*: Creates a Jenkins Server in project `$GUID-jenkins` where $GUID is the first parameter to the script. This script will also need to create three build configurations (one for each microservice) of type *Jenkinspipeline* that point to the repos in Gogs. These build configuration need to have the same name as the microservice they are building (*nationalparks*, *mlbarks* and *parksmap*. The script should also create and kick off a build configuration to build the custom Maven Slave Pod that includes Skopeo. The Jenkinsfiles should include a setup portion to use the custom maven slave pod rather than the stock maven slave pod.
+.. *bin/setup_dev.sh*: Creates a project `$GUID-parks-dev` where $GUID is the first parameter to the script. This project holds the development configurations for the three microservices including a shared MongoDB for two backend services.
+.. *bin/setup_prod.sh*: Creates a project `$GUID-parks-prod` where $GUID is the first parameter to the script. This project holds the production configurations for the three microservices (blue and green versions each) including a shared MongoDB with three replicas for backend services.
+
+== Submitting the Homework Assigment
+
+As part of the homework assignment submission include a comment indicating the `$GUID` of the Gogs installation in the OpenTLC shared cluster.
+
+== Grading process
+
+As part of the grading the student's scripts are being executed by a pipeline. If the entire pipeline finishes successfully the homework assignment is graded as *passed*. If the pipeline fails the homework assignmend is graded as *failed*.
+
+Students can verify that the homework assignment will pass by running the pipeline themselves before submitting the assignment.
+
