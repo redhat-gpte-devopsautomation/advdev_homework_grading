@@ -12,11 +12,11 @@ The following structure is required for student repositories.
 
 * *Organization*: AppDevHomework
 * *Access Credentials* for all repository should be `parks` for the user id and `r3dh4t1!` for the password.
-* In this organization there are *four private repositories*:
+* In this organization there is *one private repository* with 4 subdirectories:
 ** *Nationalparks*: Holds the code for the Nationalparks micro service
 ** *MLBParks*: Holds the code for the MLBParks micro service
 ** *Parksmap*: Holds the code for the Parksmap micro service
-** *Infrastructure*: Holds the infrastructure code to set up the project. This repository contains two subdirectories:
+** *Infrastructure*: Holds the infrastructure code to set up the project. This directory contains two subdirectories:
 . *templates*: Holds templates for the infrastructure and optionally the micro services
 . *bin*: Holds shell scripts that when executed will set up the environment. The scripts will need to leverage the templates in the *templates* folder and the OpenShift CLI or Ansible Playbooks to set up these components. It is expected that each script sets up the components completely.
 .. *bin/setup_nexus.sh*: Creates a Nexus server including Docker Registry in project `$GUID-nexus` where $GUID is the first parameter to the script.
@@ -34,4 +34,3 @@ As part of the homework assignment submission include a comment indicating the `
 As part of the grading the student's scripts are being executed by a pipeline. If the entire pipeline finishes successfully the homework assignment is graded as *passed*. If the pipeline fails the homework assignmend is graded as *failed*.
 
 Students can verify that the homework assignment will pass by running the pipeline themselves before submitting the assignment.
-
