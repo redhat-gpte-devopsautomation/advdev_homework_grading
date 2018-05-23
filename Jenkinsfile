@@ -10,23 +10,23 @@ def GUID = 'xyz'
 node {
   stage('Setup Environment') {
     echo "Cloning Infrastructure Project"
-    git "http://parks:r3dh4t1!@gogs-$GUID-gogs.apps.na37.openshift.opentlc.com/AppDevHomework/Infrastructure"
+    git "http://parks:r3dh4t1!@gogs-$GUID-gogs.apps.na37.openshift.opentlc.com/AppDevHomework/Parks"
   }
   stage('Setup Infrastructure') {
     echo "Setting up Nexus."
-    shell "./bin/setup_nexus.sh $GUID"
+    shell "./Infrastructure/bin/setup_nexus.sh $GUID"
 
     echo "Setting up Sonarqube"
-    shell "./bin/setup_sonar.sh $GUID"
+    shell "./Infrastructure/bin/setup_sonar.sh $GUID"
 
     echo "Setting up Jenkins"
-    shell "./bin/setup_jenkins.sh $GUID"
+    shell "./Infrastructure/bin/setup_jenkins.sh $GUID"
 
     echo "Creating Development Project"
-    shell "./bin/setup_dev.sh $GUID"
+    shell "./Infrastructure/bin/setup_dev.sh $GUID"
 
     echo "Creating Production Project"
-    shell "./bin/setup_prod.sh $GUID"
+    shell "./Infrastructure/bin/setup_prod.sh $GUID"
   }
   stage('Initial (Blue) build for Nationalparks') {
     "oc start build --follow nationalparks -n $GUID-jenkins"
