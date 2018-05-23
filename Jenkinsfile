@@ -6,7 +6,7 @@
 // homework assignment
 // Failure of the pipeline means that the student failed the homework assignment
 
-def GUID = 'xyz'
+def GUID = 'wk'
 node {
   stage('Setup Environment') {
     echo "Cloning Infrastructure Project"
