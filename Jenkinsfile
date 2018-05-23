@@ -6,36 +6,36 @@
 // homework assignment
 // Failure of the pipeline means that the student failed the homework assignment
 
-def GUID = 'wk'
+def GUID = "wk"
 node {
   stage('Setup Environment') {
     echo "Cloning Infrastructure Project"
-    git "http://parks:r3dh4t1!@gogs-$GUID-gogs.apps.na37.openshift.opentlc.com/AppDevHomework/Parks"
+    git credentialsId: '3f928345-6d30-48ff-84f4-a75f26313c19', url: "http://gogs-$GUID-gogs.apps.na37.openshift.opentlc.com/AppDevHomework/Parks.git"
   }
   stage('Setup Infrastructure') {
     echo "Setting up Nexus."
-    shell "./Infrastructure/bin/setup_nexus.sh $GUID"
+    sh "./Infrastructure/bin/setup_nexus.sh $GUID"
 
     echo "Setting up Sonarqube"
-    shell "./Infrastructure/bin/setup_sonar.sh $GUID"
+    sh "./Infrastructure/bin/setup_sonar.sh $GUID"
 
     echo "Setting up Jenkins"
-    shell "./Infrastructure/bin/setup_jenkins.sh $GUID"
+    sh "./Infrastructure/bin/setup_jenkins.sh $GUID"
 
     echo "Creating Development Project"
-    shell "./Infrastructure/bin/setup_dev.sh $GUID"
+    sh "./Infrastructure/bin/setup_dev.sh $GUID"
 
     echo "Creating Production Project"
-    shell "./Infrastructure/bin/setup_prod.sh $GUID"
+    sh "./Infrastructure/bin/setup_prod.sh $GUID"
   }
   stage('Initial (Blue) build for Nationalparks') {
-    "oc start build --follow nationalparks -n $GUID-jenkins"
+    // "oc start build --follow nationalparks -n $GUID-jenkins"
   }
   stage('Initial (Blue) build for MLBParks') {
-    "oc start build --follow mlbparks -n $GUID-jenkins"
+    // "oc start build --follow mlbparks -n $GUID-jenkins"
   }
   stage('Initial (Blue) build for Parksmap') {
-    "oc start build --follow parksmap -n $GUID-jenkins"
+    // "oc start build --follow parksmap -n $GUID-jenkins"
   }
   stage('Test Parksmap in Dev') {
     echo "Testing Dev Parksmap Application"
@@ -46,13 +46,13 @@ node {
     // TBD
   }
   stage('Second (Green) build for Nationalparks') {
-    "oc start build --follow nationalparks -n $GUID-jenkins"
+    // "oc start build --follow nationalparks -n $GUID-jenkins"
   }
   stage('Second (Green) build for MLBParks') {
-    "oc start build --follow mlbparks -n $GUID-jenkins"
+    // "oc start build --follow mlbparks -n $GUID-jenkins"
   }
   stage('Second (Green) build for Parksmap') {
-    "oc start build --follow parksmap -n $GUID-jenkins"
+    // "oc start build --follow parksmap -n $GUID-jenkins"
   }
   stage('Test Parksmap in Dev') {
     echo "Testing Dev Parksmap Application"
@@ -61,5 +61,11 @@ node {
   stage('Test Green Parksmap in Prod') {
     echo "Testing Green Prod Parksmap Application"
     // TBD
+  }
+  stage('Cleanup') {
+    echo "Cleanup - deleting all projects for GUID=$GUID"
+
+    sleep 120
+    sh "./Infrastructure/bin/cleanup.sh $GUID"
   }
 }

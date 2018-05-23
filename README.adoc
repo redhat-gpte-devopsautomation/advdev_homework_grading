@@ -24,6 +24,7 @@ The following structure is required for student repositories.
 .. *bin/setup_jenkins.sh*: Creates a Jenkins Server in project `$GUID-jenkins` where $GUID is the first parameter to the script. This script will also need to create three build configurations (one for each microservice) of type *Jenkinspipeline* that point to the repos in Gogs. These build configuration need to have the same name as the microservice they are building (*nationalparks*, *mlbarks* and *parksmap*. The script should also create and kick off a build configuration to build the custom Maven Slave Pod that includes Skopeo. The Jenkinsfiles should include a setup portion to use the custom maven slave pod rather than the stock maven slave pod.
 .. *bin/setup_dev.sh*: Creates a project `$GUID-parks-dev` where $GUID is the first parameter to the script. This project holds the development configurations for the three microservices including a shared MongoDB for two backend services.
 .. *bin/setup_prod.sh*: Creates a project `$GUID-parks-prod` where $GUID is the first parameter to the script. This project holds the production configurations for the three microservices (blue and green versions each) including a shared MongoDB with three replicas for backend services.
+.. *bin/cleanup.sh*: Deletes all projects to clean up the environment.
 * There also needs to be a file `nexus_settings.xml` in the root directory of the *Parks* repository that sets up Maven builds to use the configured Nexus server.
 
 == Submitting the Homework Assigment
@@ -35,3 +36,15 @@ As part of the homework assignment submission include a comment indicating the `
 As part of the grading the student's scripts are being executed by a pipeline. If the entire pipeline finishes successfully the homework assignment is graded as *passed*. If the pipeline fails the homework assignmend is graded as *failed*.
 
 Students can verify that the homework assignment will pass by running the pipeline themselves before submitting the assignment.
+
+== How to set up the Jenkins to run the test
+
+* Create new Jenkins with the Persistent Template. Grant 2Gi for the Memory Limit.
+* Allow the `jenkins` service account to create projects
++
+[source,bash]
+----
+oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins
+----
+
+* Create a new Item with the `Jenkinsfile` from this repo.
