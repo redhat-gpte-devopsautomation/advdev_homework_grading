@@ -20,35 +20,35 @@
 node {
   stage('Setup Environment') {
     echo "Cloning Infrastructure Project"
-    git url: $REPO
+    git url: ${REPO}
   }
   stage('Setup Infrastructure') {
     echo "Setting up Nexus."
-    sh "./Infrastructure/bin/setup_nexus.sh $GUID"
+    sh "./Infrastructure/bin/setup_nexus.sh ${GUID}"
 
     echo "Setting up Sonarqube"
-    sh "./Infrastructure/bin/setup_sonar.sh $GUID"
+    sh "./Infrastructure/bin/setup_sonar.sh ${GUID}"
 
     echo "Setting up Jenkins"
-    sh "./Infrastructure/bin/setup_jenkins.sh $GUID $REPO"
+    sh "./Infrastructure/bin/setup_jenkins.sh ${GUID} ${REPO}"
 
     echo "Creating Development Project"
-    sh "./Infrastructure/bin/setup_dev.sh $GUID"
+    sh "./Infrastructure/bin/setup_dev.sh ${GUID}"
 
     echo "Creating Production Project"
-    sh "./Infrastructure/bin/setup_prod.sh $GUID"
+    sh "./Infrastructure/bin/setup_prod.sh ${GUID}"
   }
   stage('First (Blue) Pipeline run for MLB Parks Service') {
     echo "Executing Initial MLB Parks Pipeline - BLUE deployment"
-    // "oc start build --follow nationalparks -n $GUID-jenkins"
+    // "oc start build --follow nationalparks -n ${GUID}-jenkins"
   }
   stage('First (Blue) Pipeline run for National Parks Service') {
     echo "Executing Initial National Parks Pipeline - BLUE deployment"
-    // "oc start build --follow mlbparks -n $GUID-jenkins"
+    // "oc start build --follow mlbparks -n ${GUID}-jenkins"
   }
   stage('First (Blue) Pipeline run for ParksMap Service') {
     echo "Executing Initial ParksMap Pipeline - BLUE deployment"
-    // "oc start build --follow parksmap -n $GUID-jenkins"
+    // "oc start build --follow parksmap -n ${GUID}-jenkins"
   }
   stage('Test Parksmap in Dev') {
     echo "Testing Dev Parksmap Application"
@@ -60,15 +60,15 @@ node {
   }
   stage('Second (Green) Pipeline run for MLB Parks Service') {
     echo "Executing Initial MLB Parks Pipeline - BLUE deployment"
-    // "oc start build --follow nationalparks -n $GUID-jenkins"
+    // "oc start build --follow nationalparks -n ${GUID}-jenkins"
   }
   stage('Second (Green) Pipeline run for National Parks Service') {
     echo "Executing Initial National Parks Pipeline - BLUE deployment"
-    // "oc start build --follow mlbparks -n $GUID-jenkins"
+    // "oc start build --follow mlbparks -n ${GUID}-jenkins"
   }
   stage('Second (Green) Pipeline run for ParksMap Service') {
     echo "Executing Initial ParksMap Pipeline - BLUE deployment"
-    // "oc start build --follow parksmap -n $GUID-jenkins"
+    // "oc start build --follow parksmap -n ${GUID}-jenkins"
   }
   stage('Test Green Parksmap in Dev') {
     echo "Testing Dev Parksmap Application"
@@ -79,9 +79,9 @@ node {
     // TBD
   }
   stage('Cleanup') {
-    echo "Cleanup - deleting all projects for GUID=$GUID"
+    echo "Cleanup - deleting all projects for GUID=${GUID}"
 
     sleep 120
-    sh "./Infrastructure/bin/cleanup.sh $GUID"
+    sh "./Infrastructure/bin/cleanup.sh ${GUID}"
   }
 }
