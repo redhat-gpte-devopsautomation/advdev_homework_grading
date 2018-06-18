@@ -47,7 +47,6 @@ pipeline {
             sh "./Infrastructure/bin/setup_nexus.sh ${GUID}"
           }
         }
-        /*
         stage("Setup Sonarqube") {
           steps {
             echo "Setting up Sonarqube"
@@ -71,13 +70,13 @@ pipeline {
             echo "Creating Production Project"
             sh "./Infrastructure/bin/setup_prod.sh ${GUID}"
           }
-        } */
+        }
       }
     }
     stage('First (Blue) Pipeline run for MLB Parks Service') {
       steps {
         echo "Executing Initial MLB Parks Pipeline - BLUE deployment"
-        // "oc start build --follow nationalparks-pipeline -n ${GUID}-jenkins"
+        "oc start build --follow nationalparks-pipeline -n ${GUID}-jenkins"
       }
     }
     stage('First (Blue) Pipeline run for National Parks Service') {
