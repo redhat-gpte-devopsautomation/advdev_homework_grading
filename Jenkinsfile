@@ -91,12 +91,6 @@ pipeline {
         // "oc start build --follow parksmap-pipeline -n ${GUID}-jenkins"
       }
     }
-    stage('Test Parksmap in Dev') {
-      steps {
-        echo "Testing Dev Parksmap Application"
-        // TBD
-      }
-    }
     stage('Test Blue Parksmap in Prod') {
       steps {
         echo "Testing Blue Prod Parksmap Application"
