@@ -7,11 +7,20 @@
 // Failure of the pipeline means that the student failed
 // the homework assignment
 
-def GUID = "wk"
+// How to setup:
+// Create a persistent Jenkins in a separate project (e.g. gpte-jenkins)
+// Create an Item of type Pipeline (Use name "HomeworkGrading")
+// Create two Parameters:
+// - GUID (type String): GUID to prefix all projects
+// - REPO (type String): full URL to the Homework Repo (either Gogs or Github)
+//                       This needs to be a public Repo
+// Use https://github.com/wkulhanek/advdev_homework_grading as the Git Repo
+//     and 'Jenkinsfile' as the Jenkinsfile.
+
 node {
   stage('Setup Environment') {
     echo "Cloning Infrastructure Project"
-    git credentialsId: '3f928345-6d30-48ff-84f4-a75f26313c19', url: "http://gogs-$GUID-gogs.apps.na37.openshift.opentlc.com/AppDevHomework/Parks.git"
+    git url: $REPO
   }
   stage('Setup Infrastructure') {
     echo "Setting up Nexus."
@@ -21,7 +30,7 @@ node {
     sh "./Infrastructure/bin/setup_sonar.sh $GUID"
 
     echo "Setting up Jenkins"
-    sh "./Infrastructure/bin/setup_jenkins.sh $GUID"
+    sh "./Infrastructure/bin/setup_jenkins.sh $GUID $REPO"
 
     echo "Creating Development Project"
     sh "./Infrastructure/bin/setup_dev.sh $GUID"
