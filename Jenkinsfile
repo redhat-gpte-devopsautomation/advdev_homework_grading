@@ -20,7 +20,7 @@
 node {
   stage('Setup Environment') {
     echo "Cloning Infrastructure Project"
-    git url: ${REPO}
+    git '${REPO}'
   }
   stage('Setup Infrastructure') {
     echo "Setting up Nexus."
