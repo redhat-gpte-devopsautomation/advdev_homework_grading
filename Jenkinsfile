@@ -76,19 +76,19 @@ pipeline {
     stage('First (Blue) Pipeline run for MLB Parks Service') {
       steps {
         echo "Executing Initial MLB Parks Pipeline - BLUE deployment"
-        // "oc start build --follow nationalparks -n ${GUID}-jenkins"
+        // "oc start build --follow nationalparks-pipeline -n ${GUID}-jenkins"
       }
     }
     stage('First (Blue) Pipeline run for National Parks Service') {
       steps {
         echo "Executing Initial National Parks Pipeline - BLUE deployment"
-        // "oc start build --follow mlbparks -n ${GUID}-jenkins"
+        // "oc start build --follow mlbparks-pipeline -n ${GUID}-jenkins"
       }
     }
     stage('First (Blue) Pipeline run for ParksMap Service') {
       steps {
         echo "Executing Initial ParksMap Pipeline - BLUE deployment"
-        // "oc start build --follow parksmap -n ${GUID}-jenkins"
+        // "oc start build --follow parksmap-pipeline -n ${GUID}-jenkins"
       }
     }
     stage('Test Parksmap in Dev') {
@@ -106,22 +106,22 @@ pipeline {
     stage('Second (Green) Pipeline run for MLB Parks Service') {
       steps {
         echo "Executing Initial MLB Parks Pipeline - BLUE deployment"
-        // "oc start build --follow nationalparks -n ${GUID}-jenkins"
+        // "oc start build --follow nationalparks-pipeline -n ${GUID}-jenkins"
       }
     }
     stage('Second (Green) Pipeline run for National Parks Service') {
       steps {
         echo "Executing Initial National Parks Pipeline - BLUE deployment"
-        // "oc start build --follow mlbparks -n ${GUID}-jenkins"
+        // "oc start build --follow mlbparks-pipeline -n ${GUID}-jenkins"
       }
     }
     stage('Second (Green) Pipeline run for ParksMap Service') {
       steps {
         echo "Executing Initial ParksMap Pipeline - BLUE deployment"
-        // "oc start build --follow parksmap -n ${GUID}-jenkins"
+        // "oc start build --follow parksmap-pipeline -n ${GUID}-jenkins"
       }
     }
-    stage('Test Green Parksmap in Dev') {
+    stage('Test Parksmap in Dev') {
       steps {
         echo "Testing Dev Parksmap Application"
         // TBD
