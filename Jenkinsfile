@@ -8,14 +8,18 @@
 // the homework assignment
 
 // How to setup:
+// -------------
 // Create a persistent Jenkins in a separate project (e.g. gpte-jenkins)
+//
 // Add self-provisioner role to the service account jenkins
-//     oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins 
+//   oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins 
+//
 // Create an Item of type Pipeline (Use name "HomeworkGrading")
 // Create two Parameters:
 // - GUID (type String):    GUID to prefix all projects
 // - REPO (type String):    full URL to the public Homework Repo
 //                          (either Gogs or Github)
+// - CLUSTER (type String): Cluster base URL. E.g. na39.openshift.opentlc.com
 // - DELETE (type Boolean): Default: true
 //                          If true will delete all created projects
 //                          after a successful run.
@@ -31,6 +35,7 @@ pipeline {
         echo "*** Advanced OpenShift Development Homework Grading ***"
         echo "*** GUID:         ${GUID}"
         echo "*** Student Repo: ${REPO}"
+        echo "*** CLUSTER:      ${CLUSTER}"
         echo "*** DELETE:       ${DELETE}"
         echo "*******************************************************"
 
@@ -56,7 +61,7 @@ pipeline {
         stage("Setup Jenkins") {
           steps {
             echo "Setting up Jenkins"
-            sh "./Infrastructure/bin/setup_jenkins.sh ${GUID} ${REPO}"
+            sh "./Infrastructure/bin/setup_jenkins.sh ${GUID} ${REPO} ${CLUSTER}"
           }
         }
         stage("Setup Development Project") {
