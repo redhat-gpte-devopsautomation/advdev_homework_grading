@@ -2,9 +2,10 @@
 // environment for OpenShift Advanced Application Development Homework
 // and then executes the pipelines to ensure that everything works
 //
-// Successful completion of this pipeline means that the student passed the
-// homework assignment
-// Failure of the pipeline means that the student failed the homework assignment
+// Successful completion of this pipeline means that the
+// student passed the homework assignment
+// Failure of the pipeline means that the student failed
+// the homework assignment
 
 def GUID = "wk"
 node {
@@ -28,13 +29,16 @@ node {
     echo "Creating Production Project"
     sh "./Infrastructure/bin/setup_prod.sh $GUID"
   }
-  stage('Initial (Blue) build for Nationalparks') {
+  stage('First (Blue) Pipeline run for MLB Parks Service') {
+    echo "Executing Initial MLB Parks Pipeline - BLUE deployment"
     // "oc start build --follow nationalparks -n $GUID-jenkins"
   }
-  stage('Initial (Blue) build for MLBParks') {
+  stage('First (Blue) Pipeline run for National Parks Service') {
+    echo "Executing Initial National Parks Pipeline - BLUE deployment"
     // "oc start build --follow mlbparks -n $GUID-jenkins"
   }
-  stage('Initial (Blue) build for Parksmap') {
+  stage('First (Blue) Pipeline run for ParksMap Service') {
+    echo "Executing Initial ParksMap Pipeline - BLUE deployment"
     // "oc start build --follow parksmap -n $GUID-jenkins"
   }
   stage('Test Parksmap in Dev') {
@@ -45,16 +49,19 @@ node {
     echo "Testing Blue Prod Parksmap Application"
     // TBD
   }
-  stage('Second (Green) build for Nationalparks') {
+  stage('Second (Green) Pipeline run for MLB Parks Service') {
+    echo "Executing Initial MLB Parks Pipeline - BLUE deployment"
     // "oc start build --follow nationalparks -n $GUID-jenkins"
   }
-  stage('Second (Green) build for MLBParks') {
+  stage('Second (Green) Pipeline run for National Parks Service') {
+    echo "Executing Initial National Parks Pipeline - BLUE deployment"
     // "oc start build --follow mlbparks -n $GUID-jenkins"
   }
-  stage('Second (Green) build for Parksmap') {
+  stage('Second (Green) Pipeline run for ParksMap Service') {
+    echo "Executing Initial ParksMap Pipeline - BLUE deployment"
     // "oc start build --follow parksmap -n $GUID-jenkins"
   }
-  stage('Test Parksmap in Dev') {
+  stage('Test Green Parksmap in Dev') {
     echo "Testing Dev Parksmap Application"
     // TBD
   }
