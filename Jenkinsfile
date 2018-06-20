@@ -83,13 +83,13 @@ pipeline {
         }
         stage("Setup Development Project") {
           steps {
-            echo "Creating Development Project"
+            echo "Setting up Development Project"
             sh "./Infrastructure/bin/setup_dev.sh ${GUID}"
           }
         }
         stage("Setup Production Project") {
           steps {
-            echo "Creating Production Project"
+            echo "Setting up Production Project"
             sh "./Infrastructure/bin/setup_prod.sh ${GUID}"
           }
         }
