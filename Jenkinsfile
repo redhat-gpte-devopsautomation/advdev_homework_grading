@@ -146,7 +146,7 @@ pipeline {
           echo "Blue MLB Parks Service: " + blueMLBParksSvc
 
           // Test ParksMap
-          def blueParksMapRoute = sh(returnStdout: true, script: "curl mlbparks-${GUID}-parks-prod.apps.${CLUSTER}/ws/appname/").trim()
+          def blueParksMapRoute = sh(returnStdout: true, script: "curl parksmap-${GUID}-parks-prod.apps.${CLUSTER}/ws/appname/").trim()
           // Check if the returned string contains "Parks Map (Blue)"
           echo "Blue ParksMap Route: " + blueParksMapRoute
         }
@@ -159,19 +159,19 @@ pipeline {
         stage('Second (Green) Pipeline run for Nationalparks Service') {
           steps {
             echo "Executing Second Nationalparks Pipeline - GREEN deployment"
-            sh "oc start build --wait=true nationalparks-pipeline -n ${GUID}-jenkins"
+            sh "oc start-build --wait=true nationalparks-pipeline -n ${GUID}-jenkins"
           }
         }
         stage('Second (Green) Pipeline run for National Parks Service') {
           steps {
             echo "Executing Second National Parks Pipeline - GREEN deployment"
-            sh "oc start build --wait=true mlbparks-pipeline -n ${GUID}-jenkins"
+            sh "oc start-build --wait=true mlbparks-pipeline -n ${GUID}-jenkins"
           }
         }
         stage('Second (Green) Pipeline run for ParksMap Service') {
           steps {
             echo "Executing Second ParksMap Pipeline - GREEN deployment"
-            sh "oc start build --wait=true parksmap-pipeline -n ${GUID}-jenkins"
+            sh "oc start-build --wait=true parksmap-pipeline -n ${GUID}-jenkins"
           }
         }
       }
@@ -197,7 +197,7 @@ pipeline {
           echo "Green MLB Parks Service: " + greenMLBParksSvc
 
           // Test ParksMap
-          def greenParksMapRoute = sh(returnStdout: true, script: "curl mlbparks-${GUID}-parks-prod.apps.${CLUSTER}/ws/appname/").trim()
+          def greenParksMapRoute = sh(returnStdout: true, script: "curl parksmap-${GUID}-parks-prod.apps.${CLUSTER}/ws/appname/").trim()
           // Check if the returned string contains "Parks Map (Blue)"
           echo "ParksMap Route: " + greenParksMapRoute
         }
