@@ -159,19 +159,19 @@ pipeline {
         stage('Second (Green) Pipeline run for Nationalparks Service') {
           steps {
             echo "Executing Second Nationalparks Pipeline - GREEN deployment"
-            "oc start build --wait=true nationalparks-pipeline -n ${GUID}-jenkins"
+            sh "oc start build --wait=true nationalparks-pipeline -n ${GUID}-jenkins"
           }
         }
         stage('Second (Green) Pipeline run for National Parks Service') {
           steps {
             echo "Executing Second National Parks Pipeline - GREEN deployment"
-            "oc start build --wait=true mlbparks-pipeline -n ${GUID}-jenkins"
+            sh "oc start build --wait=true mlbparks-pipeline -n ${GUID}-jenkins"
           }
         }
         stage('Second (Green) Pipeline run for ParksMap Service') {
           steps {
             echo "Executing Second ParksMap Pipeline - GREEN deployment"
-            "oc start build --wait=true parksmap-pipeline -n ${GUID}-jenkins"
+            sh "oc start build --wait=true parksmap-pipeline -n ${GUID}-jenkins"
           }
         }
       }
