@@ -112,41 +112,44 @@ pipeline {
     stage('Test Initial Parksmap in Dev') {
       steps {
         echo "Testing Initial Parksmap Dev Application"
-        // Test Dev Nationalparks
-        def devNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks.${GUID}-parks-dev.svc.cluster.local:8080/ws/info/").trim()
-        echo "Dev National Parks Service: " + devNationalParksSvc
-        // Check if the returned string contains "National Parks (Dev)"
+        script {
+          // Test Dev Nationalparks
+          def devNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks.${GUID}-parks-dev.svc.cluster.local:8080/ws/info/").trim()
+          echo "Dev National Parks Service: " + devNationalParksSvc
+          // Check if the returned string contains "National Parks (Dev)"
 
-        // Test Dev MLBParks
-        def devMLBParksSvc = sh(returnStdout: true, script: "curl mlbparks.${GUID}-parks-dev.svc.cluster.local:8080/ws/info/").trim()
-        echo "Dev MLB Parks Service: " + devMLBParksSvc
-        // Check if the returned string contains "MLB Parks (Dev)"
+          // Test Dev MLBParks
+          def devMLBParksSvc = sh(returnStdout: true, script: "curl mlbparks.${GUID}-parks-dev.svc.cluster.local:8080/ws/info/").trim()
+          echo "Dev MLB Parks Service: " + devMLBParksSvc
+          // Check if the returned string contains "MLB Parks (Dev)"
 
-        // Test ParksMap
-        def devParksMapRoute = sh(returnStdout: true, script: "curl parksmap-${GUID}-parks-dev.apps.${CLUSTER}/ws/appname/").trim()
-        echo "Dev ParksMap Route: " + devParksMapRoute
-        // Check if the returned string contains "Parks Map (Dev)"
+          // Test ParksMap
+          def devParksMapRoute = sh(returnStdout: true, script: "curl parksmap-${GUID}-parks-dev.apps.${CLUSTER}/ws/appname/").trim()
+          echo "Dev ParksMap Route: " + devParksMapRoute
+          // Check if the returned string contains "Parks Map (Dev)"
 
-
+        }
       }
     }
     stage('Test Initial (Blue) Parksmap in Prod') {
       steps {
         echo "Testing Prod Parksmap Application (BLUE)"
-        // Test Blue Nationalparks:
-        def blueNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks-blue.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
-        // Check if the returned string contains "National Parks (Blue)"
-        echo "Blue National Parks Service: " + blueNationalParksSvc
+        script {
+          // Test Blue Nationalparks:
+          def blueNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks-blue.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
+          // Check if the returned string contains "National Parks (Blue)"
+          echo "Blue National Parks Service: " + blueNationalParksSvc
 
-        // Test Dev MLBParks:
-        def blueMLBParksSvc = sh(returnStdout: true, script: "curl mlbparks-blue.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
-        // Check if the returned string contains "MLB Parks (Blue)"
-        echo "Blue MLB Parks Service: " + blueMLBParksSvc
+          // Test Dev MLBParks:
+          def blueMLBParksSvc = sh(returnStdout: true, script: "curl mlbparks-blue.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
+          // Check if the returned string contains "MLB Parks (Blue)"
+          echo "Blue MLB Parks Service: " + blueMLBParksSvc
 
-        // Test ParksMap
-        def blueParksMapRoute = sh(returnStdout: true, script: "curl mlbparks-${GUID}-parks-prod.apps.${CLUSTER}/ws/appname/").trim()
-        // Check if the returned string contains "Parks Map (Blue)"
-        echo "Blue ParksMap Route: " + blueParksMapRoute
+          // Test ParksMap
+          def blueParksMapRoute = sh(returnStdout: true, script: "curl mlbparks-${GUID}-parks-prod.apps.${CLUSTER}/ws/appname/").trim()
+          // Check if the returned string contains "Parks Map (Blue)"
+          echo "Blue ParksMap Route: " + blueParksMapRoute
+        }
       }
     }
     
@@ -182,21 +185,22 @@ pipeline {
     stage('Test Green Parksmap in Prod') {
       steps {
         echo "Testing Prod Parksmap Application (BLUE)"
+        script {
+          // Test Green Nationalparks:
+          def greenNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks-green.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
+          // Check if the returned string contains "National Parks (Green)"
+          echo "Green National Parks Service: " + greenNationalParksSvc
 
-        // Test Green Nationalparks:
-        def greenNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks-green.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
-        // Check if the returned string contains "National Parks (Green)"
-        echo "Green National Parks Service: " + greenNationalParksSvc
+          // Test Dev MLBParks:
+          def greenMLBParksSvc = sh(returnStdout: true, script: "curl mlbparks-green.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
+          // Check if the returned string contains "MLB Parks (Blue)"
+          echo "Green MLB Parks Service: " + greenMLBParksSvc
 
-        // Test Dev MLBParks:
-        def greenMLBParksSvc = sh(returnStdout: true, script: "curl mlbparks-green.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
-        // Check if the returned string contains "MLB Parks (Blue)"
-        echo "Green MLB Parks Service: " + greenMLBParksSvc
-
-        // Test ParksMap
-        def greenParksMapRoute = sh(returnStdout: true, script: "curl mlbparks-${GUID}-parks-prod.apps.${CLUSTER}/ws/appname/").trim()
-        // Check if the returned string contains "Parks Map (Blue)"
-        echo "ParksMap Route: " + greenParksMapRoute
+          // Test ParksMap
+          def greenParksMapRoute = sh(returnStdout: true, script: "curl mlbparks-${GUID}-parks-prod.apps.${CLUSTER}/ws/appname/").trim()
+          // Check if the returned string contains "Parks Map (Blue)"
+          echo "ParksMap Route: " + greenParksMapRoute
+        }
       }
     }
     stage('Cleanup') {
