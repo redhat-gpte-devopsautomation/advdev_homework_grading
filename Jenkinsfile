@@ -1,43 +1,48 @@
-// This pipeline automatically creates a full homework
+// This pipeline automatically tests a student's full homework
 // environment for OpenShift Advanced Application Development Homework
-// and then executes the pipelines to ensure that everything works
+// and then executes the pipelines to ensure that everything works.
 //
 // Successful completion of this pipeline means that the
-// student passed the homework assignment
+// student passed the homework assignment.
 // Failure of the pipeline means that the student failed
-// the homework assignment
+// the homework assignment.
 
 // How to setup:
 // -------------
-// Create a persistent Jenkins in a separate project (e.g. gpte-jenkins)
+// * Create a persistent Jenkins in a separate project (e.g. gpte-jenkins)
 //
-// Add self-provisioner role to the service account jenkins
+// * Add self-provisioner role to the service account jenkins
 //   oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins 
 //
-// Create an Item of type Pipeline (Use name "HomeworkGrading")
-// Create two Parameters:
-// - GUID (type String):    GUID to prefix all projects
-// - REPO (type String):    full URL to the public Homework Repo
-//                          (either Gogs or Github)
-// - CLUSTER (type String): Cluster base URL. E.g. na39.openshift.opentlc.com
-// - DELETE (type Boolean): Default: true
-//                          If true will delete all created projects
-//                          after a successful run.
-// Use https://github.com/wkulhanek/advdev_homework_grading as the Git Repo
-//     and 'Jenkinsfile' as the Jenkinsfile.
+// * Create an Item of type Pipeline (Use name "HomeworkGrading")
+// * Create Five Parameters:
+//   - GUID (type String):    GUID to prefix all projects
+//   - REPO (type String):    full URL to the public Homework Repo
+//                            (either Gogs or Github)
+//   - CLUSTER (type String): Cluster base URL. E.g. na39.openshift.opentlc.com
+//   - SETUP (type Boolean):  Default: true
+//                            If true will create all necessary projects.
+//                            If false assumes that projects are already there and only pipelines need
+//                            to be executed.
+//   - DELETE (type Boolean): Default: true
+//                            If true will delete all created projects
+//                            after a successful run.
+// * Use https://github.com/wkulhanek/advdev_homework_grading as the Git Repo
+//   and 'Jenkinsfile' as the Jenkinsfile.
 
 pipeline {
   agent any
   stages {
     stage('Get Student Homework Repo') {
       steps {
-        echo "*******************************************************"
-        echo "*** Advanced OpenShift Development Homework Grading ***"
-        echo "*** GUID:         ${GUID}"
-        echo "*** Student Repo: ${REPO}"
-        echo "*** CLUSTER:      ${CLUSTER}"
-        echo "*** DELETE:       ${DELETE}"
-        echo "*******************************************************"
+        echo "*******************************************************\n" +
+             "*** Advanced OpenShift Development Homework Grading ***\n" +
+             "*** GUID:         ${GUID}\n" +
+             "*** Student Repo: ${REPO}\n" +
+             "*** CLUSTER:      ${CLUSTER}\n" +
+             "*** SETUP:        ${SETUP}\n" +
+             "*** DELETE:       ${DELETE}\n" +
+             "*******************************************************"
 
         echo "Cloning Infrastructure Project"
         git '${REPO}'
@@ -45,6 +50,9 @@ pipeline {
     }
     stage("Setup Infrastructure") {
       failFast true
+      when {
+        environment name: 'SETUP', value: 'true'
+      }
       parallel {
         stage("Setup Nexus") {
           steps {
@@ -81,60 +89,114 @@ pipeline {
     stage("First Pipeline Runs") {
       failFast true
       parallel {
-        stage('First (Blue) Pipeline run for MLB Parks Service') {
+        stage('First (Blue) Pipeline run for Nationalparks Service') {
           steps {
-            echo "Executing Initial MLB Parks Pipeline - BLUE deployment"
-            sh "oc start build --follow nationalparks-pipeline -n ${GUID}-jenkins"
+            echo "Executing Initial Nationalparks Pipeline - BLUE deployment"
+            sh "oc start-build --wait=true nationalparks-pipeline -n ${GUID}-jenkins"
           }
         }
-        stage('First (Blue) Pipeline run for National Parks Service') {
+        stage('First (Blue) Pipeline run for MLBParks Service') {
           steps {
-            echo "Executing Initial National Parks Pipeline - BLUE deployment"
-            // sh "oc start build --follow mlbparks-pipeline -n ${GUID}-jenkins"
+            echo "Executing Initial MLBParks Pipeline - BLUE deployment"
+            sh "oc start-build --wait=true mlbparks-pipeline -n ${GUID}-jenkins"
           }
         }
         stage('First (Blue) Pipeline run for ParksMap Service') {
           steps {
             echo "Executing Initial ParksMap Pipeline - BLUE deployment"
-            // sh "oc start build --follow parksmap-pipeline -n ${GUID}-jenkins"
+            sh "oc start-build --wait=true parksmap-pipeline -n ${GUID}-jenkins"
           }
         }
       }
     }
-    stage('Test Blue Parksmap in Prod') {
+    stage('Test Initial Parksmap in Dev') {
       steps {
-        echo "Testing Blue Prod Parksmap Application"
-        // TBD
+        echo "Testing Initial Parksmap Dev Application"
+        // Test Dev Nationalparks
+        def devNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks.${GUID}-parks-dev.svc.cluster.local:8080/ws/info/").trim()
+        echo "Dev National Parks Service: " + devNationalParksSvc
+        // Check if the returned string contains "National Parks (Dev)"
+
+        // Test Dev MLBParks
+        def devMLBParksSvc = sh(returnStdout: true, script: "curl mlbparks.${GUID}-parks-dev.svc.cluster.local:8080/ws/info/").trim()
+        echo "Dev MLB Parks Service: " + devMLBParksSvc
+        // Check if the returned string contains "MLB Parks (Dev)"
+
+        // Test ParksMap
+        def devParksMapRoute = sh(returnStdout: true, script: "curl parksmap-${GUID}-parks-dev.apps.${CLUSTER}/ws/appname/").trim()
+        echo "Dev ParksMap Route: " + devParksMapRoute
+        // Check if the returned string contains "Parks Map (Dev)"
+
+
       }
     }
-    stage('Second (Green) Pipeline run for MLB Parks Service') {
+    stage('Test Initial (Blue) Parksmap in Prod') {
       steps {
-        echo "Executing Initial MLB Parks Pipeline - BLUE deployment"
-        // "oc start build --follow nationalparks-pipeline -n ${GUID}-jenkins"
+        echo "Testing Prod Parksmap Application (BLUE)"
+        // Test Blue Nationalparks:
+        def blueNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks-blue.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
+        // Check if the returned string contains "National Parks (Blue)"
+        echo "Blue National Parks Service: " + blueNationalParksSvc
+
+        // Test Dev MLBParks:
+        def blueMLBParksSvc = sh(returnStdout: true, script: "curl mlbparks-blue.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
+        // Check if the returned string contains "MLB Parks (Blue)"
+        echo "Blue MLB Parks Service: " + blueMLBParksSvc
+
+        // Test ParksMap
+        def blueParksMapRoute = sh(returnStdout: true, script: "curl mlbparks-${GUID}-parks-prod.apps.${CLUSTER}/ws/appname/").trim()
+        // Check if the returned string contains "Parks Map (Blue)"
+        echo "Blue ParksMap Route: " + blueParksMapRoute
       }
     }
-    stage('Second (Green) Pipeline run for National Parks Service') {
-      steps {
-        echo "Executing Initial National Parks Pipeline - BLUE deployment"
-        // "oc start build --follow mlbparks-pipeline -n ${GUID}-jenkins"
+    
+    stage("Second Pipeline Runs") {
+      failFast true
+      parallel {
+        stage('Second (Green) Pipeline run for Nationalparks Service') {
+          steps {
+            echo "Executing Second Nationalparks Pipeline - GREEN deployment"
+            "oc start build --wait=true nationalparks-pipeline -n ${GUID}-jenkins"
+          }
+        }
+        stage('Second (Green) Pipeline run for National Parks Service') {
+          steps {
+            echo "Executing Second National Parks Pipeline - GREEN deployment"
+            "oc start build --wait=true mlbparks-pipeline -n ${GUID}-jenkins"
+          }
+        }
+        stage('Second (Green) Pipeline run for ParksMap Service') {
+          steps {
+            echo "Executing Second ParksMap Pipeline - GREEN deployment"
+            "oc start build --wait=true parksmap-pipeline -n ${GUID}-jenkins"
+          }
+        }
       }
     }
-    stage('Second (Green) Pipeline run for ParksMap Service') {
+    stage('Test Second Parksmap in Dev') {
       steps {
-        echo "Executing Initial ParksMap Pipeline - BLUE deployment"
-        // "oc start build --follow parksmap-pipeline -n ${GUID}-jenkins"
-      }
-    }
-    stage('Test Parksmap in Dev') {
-      steps {
-        echo "Testing Dev Parksmap Application"
+        echo "Testing Second Parksmap Dev Application"
         // TBD
       }
     }
     stage('Test Green Parksmap in Prod') {
       steps {
-        echo "Testing Green Prod Parksmap Application"
-        // TBD
+        echo "Testing Prod Parksmap Application (BLUE)"
+
+        // Test Green Nationalparks:
+        def greenNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks-green.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
+        // Check if the returned string contains "National Parks (Green)"
+        echo "Green National Parks Service: " + greenNationalParksSvc
+
+        // Test Dev MLBParks:
+        def greenMLBParksSvc = sh(returnStdout: true, script: "curl mlbparks-green.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
+        // Check if the returned string contains "MLB Parks (Blue)"
+        echo "Green MLB Parks Service: " + greenMLBParksSvc
+
+        // Test ParksMap
+        def greenParksMapRoute = sh(returnStdout: true, script: "curl mlbparks-${GUID}-parks-prod.apps.${CLUSTER}/ws/appname/").trim()
+        // Check if the returned string contains "Parks Map (Blue)"
+        echo "ParksMap Route: " + greenParksMapRoute
       }
     }
     stage('Cleanup') {
