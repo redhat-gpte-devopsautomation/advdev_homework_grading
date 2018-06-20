@@ -54,9 +54,15 @@ pipeline {
         environment name: 'SETUP', value: 'true'
       }
       parallel {
+        stage("Create Projects") {
+           steps {
+            echo "Creating Projects"
+            sh "./Infrastructure/bin/setup_projects.sh ${GUID}"
+          }
+        }
         stage("Setup Nexus") {
           steps {
-            echo "Setting up Nexus."
+            echo "Setting up Nexus"
             sh "./Infrastructure/bin/setup_nexus.sh ${GUID}"
           }
         }
