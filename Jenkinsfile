@@ -86,22 +86,31 @@ pipeline {
         }
       }
     }
-    stage("First Pipeline Runs") {
+    stage("Reset Infrastructure") {
+      failFast true
+      when {
+        environment name: 'SETUP', value: 'false'
+      }
+      steps {
+        sh "./Infrastructure/bin/reset_prod.sh ${GUID}"
+      }
+    }
+    stage("First Pipeline Runs (from Green to Blue)") {
       failFast true
       parallel {
-        stage('First (Blue) Pipeline run for Nationalparks Service') {
+        stage('First Pipeline run for Nationalparks Service') {
           steps {
             echo "Executing Initial Nationalparks Pipeline - BLUE deployment"
             sh "oc start-build --wait=true nationalparks-pipeline -n ${GUID}-jenkins"
           }
         }
-        stage('First (Blue) Pipeline run for MLBParks Service') {
+        stage('First Pipeline run for MLBParks Service') {
           steps {
             echo "Executing Initial MLBParks Pipeline - BLUE deployment"
             sh "oc start-build --wait=true mlbparks-pipeline -n ${GUID}-jenkins"
           }
         }
-        stage('First (Blue) Pipeline run for ParksMap Service') {
+        stage('First Pipeline run for ParksMap Service') {
           steps {
             echo "Executing Initial ParksMap Pipeline - BLUE deployment"
             sh "oc start-build --wait=true parksmap-pipeline -n ${GUID}-jenkins"
@@ -109,9 +118,9 @@ pipeline {
         }
       }
     }
-    stage('Test Initial Parksmap in Dev') {
+    stage('Test Parksmap in Dev') {
       steps {
-        echo "Testing Initial Parksmap Dev Application"
+        echo "Testing Parksmap Dev Application"
         script {
           // Test Dev Nationalparks
           def devNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks.${GUID}-parks-dev.svc.cluster.local:8080/ws/info/").trim()
@@ -131,7 +140,7 @@ pipeline {
         }
       }
     }
-    stage('Test Initial (Blue) Parksmap in Prod') {
+    stage('Test Blue Parksmap in Prod') {
       steps {
         echo "Testing Prod Parksmap Application (BLUE)"
         script {
@@ -153,22 +162,22 @@ pipeline {
       }
     }
     
-    stage("Second Pipeline Runs") {
+    stage("Second Pipeline Runs (from Blue to Green)") {
       failFast true
       parallel {
-        stage('Second (Green) Pipeline run for Nationalparks Service') {
+        stage('Second Pipeline run for Nationalparks Service') {
           steps {
             echo "Executing Second Nationalparks Pipeline - GREEN deployment"
             sh "oc start-build --wait=true nationalparks-pipeline -n ${GUID}-jenkins"
           }
         }
-        stage('Second (Green) Pipeline run for National Parks Service') {
+        stage('Second Pipeline run for National Parks Service') {
           steps {
             echo "Executing Second National Parks Pipeline - GREEN deployment"
             sh "oc start-build --wait=true mlbparks-pipeline -n ${GUID}-jenkins"
           }
         }
-        stage('Second (Green) Pipeline run for ParksMap Service') {
+        stage('Second Pipeline run for ParksMap Service') {
           steps {
             echo "Executing Second ParksMap Pipeline - GREEN deployment"
             sh "oc start-build --wait=true parksmap-pipeline -n ${GUID}-jenkins"
@@ -176,15 +185,9 @@ pipeline {
         }
       }
     }
-    stage('Test Second Parksmap in Dev') {
-      steps {
-        echo "Testing Second Parksmap Dev Application"
-        // TBD
-      }
-    }
     stage('Test Green Parksmap in Prod') {
       steps {
-        echo "Testing Prod Parksmap Application (BLUE)"
+        echo "Testing Prod Parksmap Application (GREEN)"
         script {
           // Test Green Nationalparks:
           def greenNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks-green.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
