@@ -48,18 +48,21 @@ pipeline {
         git '${REPO}'
       }
     }
+    stage("Create Projects") {
+      when {
+        environment name: 'SETUP', value: 'true'
+      }
+      steps {
+        echo "Creating Projects"
+        sh "./Infrastructure/bin/setup_projects.sh ${GUID}"
+      }
+    }
     stage("Setup Infrastructure") {
       failFast true
       when {
         environment name: 'SETUP', value: 'true'
       }
       parallel {
-        stage("Create Projects") {
-           steps {
-            echo "Creating Projects"
-            sh "./Infrastructure/bin/setup_projects.sh ${GUID}"
-          }
-        }
         stage("Setup Nexus") {
           steps {
             echo "Setting up Nexus"
