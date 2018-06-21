@@ -2,34 +2,13 @@
 
 This repository contains the scripts that students can use to validate that their homework assignment will pass.
 
-The automatic grading process requires a public student repository on a custom Gogs installation on the OpenTLC Shared Cluster. This repository will be used to automatically create everything else.
-
-The name of the Gogs project should be `$GUID-gogs` where $GUID can be freely chosen by the student.
+The automatic grading process requires a public student repository on a Git compatible source code repository. This can be on Github or a custom public Gogs installation.
 
 == Student Repository Structure
 
-The following structure is required for student repositories.
+A skeleton student repository is provided at https://github.com/wkulhanek/advdev_homework_template.
 
-* *Organization*: `AppDevHomework`
-* *Access Credentials* for all repository should be `parks` for the user id and `r3dh4t1!` for the password.
-* In this organization there is *one private repository* named `Parks` with 4 subdirectories:
-** *Nationalparks*: Holds the code for the Nationalparks micro service
-** *MLBParks*: Holds the code for the MLBParks micro service
-** *Parksmap*: Holds the code for the Parksmap micro service
-** *Infrastructure*: Holds the infrastructure code to set up the project. This directory contains two subdirectories:
-. *templates*: Holds templates for the infrastructure and optionally the micro services
-. *bin*: Holds shell scripts that when executed will set up the environment. The scripts will need to leverage the templates in the *templates* folder and the OpenShift CLI or Ansible Playbooks to set up these components. It is expected that each script sets up the components completely.
-.. *bin/setup_nexus.sh*: Creates a Nexus server including Docker Registry in project `$GUID-nexus` where $GUID is the first parameter to the script.
-.. *bin/setup_sonar.sh*: Creates a full Sonarqube server including PostgreSQL database in project `$GUID-sonarqube` where $GUID is the first parameter to the script.
-.. *bin/setup_jenkins.sh*: Creates a Jenkins Server in project `$GUID-jenkins` where $GUID is the first parameter to the script. This script will also need to create three build configurations (one for each microservice) of type *Jenkinspipeline* that point to the repos in Gogs. These build configuration need to have the same name as the microservice they are building (*nationalparks*, *mlbarks* and *parksmap*. The script should also create and kick off a build configuration to build the custom Maven Slave Pod that includes Skopeo. The Jenkinsfiles should include a setup portion to use the custom maven slave pod rather than the stock maven slave pod.
-.. *bin/setup_dev.sh*: Creates a project `$GUID-parks-dev` where $GUID is the first parameter to the script. This project holds the development configurations for the three microservices including a shared MongoDB for two backend services.
-.. *bin/setup_prod.sh*: Creates a project `$GUID-parks-prod` where $GUID is the first parameter to the script. This project holds the production configurations for the three microservices (blue and green versions each) including a shared MongoDB with three replicas for backend services.
-.. *bin/cleanup.sh*: Deletes all projects to clean up the environment.
-* There also needs to be a file `nexus_settings.xml` in the root directory of the *Parks* repository that sets up Maven builds to use the configured Nexus server.
-
-== Submitting the Homework Assigment
-
-As part of the homework assignment submission include a comment indicating the `$GUID` of the Gogs installation in the OpenTLC shared cluster.
+See the homework assignment lab on instructions what to implement. Also see the README files in the skeleton repo (and it's three service subdirectories) on how to build and deploy the applications.
 
 == Grading process
 
@@ -39,12 +18,45 @@ Students can verify that the homework assignment will pass by running the pipeli
 
 == How to set up the Jenkins to run the test
 
-* Create new Jenkins with the Persistent Template. Grant 2Gi for the Memory Limit.
-* Allow the `jenkins` service account to create projects
+. Create a Jenkins Project in your cluster (e.g. `grading-jenkins`).
+. Allow the `jenkins` service account to create projects
 +
 [source,bash]
 ----
-oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins
+oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:grading-jenkins:jenkins
 ----
++
+. Create a Persistent Jenkins with 2Gi memory in that project.
+. Create a new Item in Jenkins of type `Pipeline`.
+. Use the following settings in the Item:
+.. This build is parametrized
+.. Create five parameters:
+* *GUID* (type String):    GUID to prefix all projects
+* *REPO* (type String):    full URL to the public Homework Repo (either Gogs or Github)
+* *CLUSTER* (type String): Cluster base URL. E.g. na39.openshift.opentlc.com
+* *SETUP* (type Boolean):  Default: true
+** If *true* will create all necessary projects.
+** If *false* assumes that projects are already there and only pipelines need to be executed.
+* *DELETE* (type Boolean): Default: true
+** If *true* will delete all created projects after a successful run.
+. Use https://github.com/wkulhanek/advdev_homework_grading as the Git Repo and 'Jenkinsfile' as the Jenkinsfile.
 
-* Create a new Item with the `Jenkinsfile` from this repo.
+Now you are ready to try the pipeline. Run the pipeline and provide the appropriate parameters for your environment.
+
+The pipeline will:
+
+* Check out your source code repository
+* Call your shell scripts to
+** Create projects
+** Setup Nexus
+** Setup SonarQube
+** Setup Jenkins
+** Setup the Development Project
+** Setup the Production Project
+* Execute the pipelines for your three microservices for the initial (green) deployment.
+* Check that the services return the correct application name
+* Execute the pipelines again to execute the blue deployment
+* Again check that the services return the correct application name
+* Delete the projects
+
+If the pipeline completes successfully you have passed the homework assignment.
