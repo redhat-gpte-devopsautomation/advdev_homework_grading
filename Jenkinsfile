@@ -17,6 +17,7 @@
 // * Create an Item of type Pipeline (Use name "HomeworkGrading")
 // * Create Five Parameters:
 //   - GUID (type String):    GUID to prefix all projects
+//   - USER (type String):    OpenTLC User ID to receive admin permissions on created projects
 //   - REPO (type String):    full URL to the public Homework Repo
 //                            (either Gogs or Github)
 //   - CLUSTER (type String): Cluster base URL. E.g. na39.openshift.opentlc.com
