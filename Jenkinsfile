@@ -38,6 +38,7 @@ pipeline {
         echo "*******************************************************\n" +
              "*** Advanced OpenShift Development Homework Grading ***\n" +
              "*** GUID:         ${GUID}\n" +
+             "*** USER:         ${USER}\n" +
              "*** Student Repo: ${REPO}\n" +
              "*** CLUSTER:      ${CLUSTER}\n" +
              "*** SETUP:        ${SETUP}\n" +
@@ -54,7 +55,7 @@ pipeline {
       }
       steps {
         echo "Creating Projects"
-        sh "./Infrastructure/bin/setup_projects.sh ${GUID}"
+        sh "./Infrastructure/bin/setup_projects.sh ${GUID} ${USER}"
       }
     }
     stage("Setup Infrastructure") {

@@ -32,6 +32,7 @@ oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gr
 .. This build is parametrized
 .. Create five parameters:
 * *GUID* (type String):    GUID to prefix all projects
+* *USER* (type String):    OpenTLC User ID (e.g. wkulhane-redhat.com) to grant admin access for created projects for
 * *REPO* (type String):    full URL to the public Homework Repo (either Gogs or Github)
 * *CLUSTER* (type String): Cluster base URL. E.g. na39.openshift.opentlc.com
 * *SETUP* (type Boolean):  Default: true
