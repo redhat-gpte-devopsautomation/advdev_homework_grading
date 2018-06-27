@@ -18,28 +18,45 @@ Students can verify that the homework assignment will pass by running the pipeli
 
 == How to set up the Jenkins to run the test
 
-. Create a Jenkins Project in your cluster (e.g. `grading-jenkins`).
-. Allow the `jenkins` service account to create projects
+. Make sure you are logged in as a `cluster-admin` user (e.g. `system:admin`).
+. Create a Jenkins Project (e.g. `gpte-jenkins`) in your cluster.
 +
 [source,bash]
 ----
-oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:grading-jenkins:jenkins
+oc new-project gpte-jenkins --description "GPTE Homework Grading Jenkins"
+----
+
+. Deploy a persistent Jenkins.
++
+[source,bash]
+----
+oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi -n gpte-jenkins
+oc set resources dc/jenkins --limits=cpu=1 --requests=memory=2Gi,cpu=1 -n gpte-jenkins
 ----
 +
-. Create a Persistent Jenkins with 2Gi memory in that project.
-. Create a new Item in Jenkins of type `Pipeline`.
+. Create a custom Cluster-Role and grant it to the `jenkins` service account to annotate projects. Also allow the `jenkins` service account to create projects.
++
+[source,bash]
+----
+oc create clusterrole namespace-patcher --verb=patch --resource=namespaces
+oc adm policy add-cluster-role-to-user namespace-patcher system:serviceaccount:gpte-jenkins:jenkins
+oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins
+----
+
+. In Jenkins create a new Item of type `Pipeline`.
 . Use the following settings in the Item:
 .. This build is parametrized
-.. Create five parameters:
-* *GUID* (type String):    GUID to prefix all projects
-* *USER* (type String):    OpenTLC User ID (e.g. wkulhane-redhat.com) to grant admin access for created projects for
-* *REPO* (type String):    full URL to the public Homework Repo (either Gogs or Github)
-* *CLUSTER* (type String): Cluster base URL. E.g. na39.openshift.opentlc.com
-* *SETUP* (type Boolean):  Default: true
-** If *true* will create all necessary projects.
-** If *false* assumes that projects are already there and only pipelines need to be executed.
-* *DELETE* (type Boolean): Default: true
-** If *true* will delete all created projects after a successful run.
+.. Create six parameters:
++
+|====
+|*GUID*|String|GUID to prefix all projects
+|*USER*|String|OpenTLC User ID (e.g. wkulhane-redhat.com) to grant admin access for created projects and set the project requester field.
+|*REPO*|String|Full URL to the public Homework Repo (either Gogs or Github)
+|*CLUSTER*|String|Cluster base URL. E.g. na39.openshift.opentlc.com
+|*SETUP*|Boolean|Default: true, If *true* will create all necessary projects. If *false* assumes that projects are already there and only pipelines need to be executed.
+|*DELETE*|Boolean|Default: true, If *true* will delete all created projects after a successful run.
+|====
++
 . Use https://github.com/wkulhanek/advdev_homework_grading as the Git Repo and 'Jenkinsfile' as the Jenkinsfile.
 
 Now you are ready to try the pipeline. Run the pipeline and provide the appropriate parameters for your environment.
