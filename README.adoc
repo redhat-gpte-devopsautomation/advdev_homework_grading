@@ -59,6 +59,12 @@ oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gp
 +
 . Use https://github.com/wkulhanek/advdev_homework_grading as the Git Repo and 'Jenkinsfile' as the Jenkinsfile.
 
+. If this is a shared Jenkins (e.g. on the NA39 GPTE Cluster) allow students to start builds:
+.. Log into Jenkins
+.. Navigate to *Manage Jenkins* -> *Configure Global Security*
+.. Leave *Matrix based security* and check the checkboxes under *Job* to allow *authenticated users* to *Build* and *Cancel* builds.
+.. Click *Save*.
+
 Now you are ready to try the pipeline. Run the pipeline and provide the appropriate parameters for your environment.
 
 The pipeline will:
