@@ -43,6 +43,15 @@ oc adm policy add-cluster-role-to-user namespace-patcher system:serviceaccount:g
 oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins
 ----
 
+. Somehow Jenkins seems to lose the context for the embedded oc command after a few days. Restarting the Jenkins Pod fixes this problem. Therefore set up a Cronjob to restart Jenkins every day at 23:00. For this to work the default service account needs edit permissions for the project it is in.
++
+[source,bash]
+----
+oc policy add-role-to-user edit system:serviceaccount:gpte-jenkins:default -n gpte-jenkins
+oc run restartjenkins --schedule="* 23 * * ?" --restart=OnFailure -n gpte-jenkins --image=registry.access.redhat.com/openshift3/jenkins-2-rhel7:v3.9 -- /bin/sh -c "oc scale dc jenkins --replicas=0 && sleep 20 && oc scale dc jenkins --replicas=1"
+----
+
+. Once Jenkins is up and running log into Jenkins.
 . In Jenkins create a new Item of type `Pipeline`.
 . Use the following settings in the Item:
 .. This build is parametrized
