@@ -48,7 +48,7 @@ oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gp
 [source,bash]
 ----
 oc policy add-role-to-user edit system:serviceaccount:gpte-jenkins:default -n gpte-jenkins
-oc run restartjenkins --schedule="* 23 * * ?" --restart=OnFailure -n gpte-jenkins --image=registry.access.redhat.com/openshift3/jenkins-2-rhel7:v3.9 -- /bin/sh -c "oc scale dc jenkins --replicas=0 && sleep 20 && oc scale dc jenkins --replicas=1"
+oc run restartjenkins --schedule="0 23 * * *" --restart=OnFailure -n gpte-jenkins --image=registry.access.redhat.com/openshift3/jenkins-2-rhel7:v3.9 -- /bin/sh -c "oc scale dc jenkins --replicas=0 && sleep 20 && oc scale dc jenkins --replicas=1"
 ----
 
 . Once Jenkins is up and running log into Jenkins.
