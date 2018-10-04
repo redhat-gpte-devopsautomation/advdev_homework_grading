@@ -66,7 +66,7 @@ oc run restartjenkins --schedule="0 23 * * *" --restart=OnFailure -n gpte-jenkin
 |*DELETE*|Boolean|Default: true, If *true* will delete all created projects after a successful run.
 |====
 +
-. Use https://github.com/wkulhanek/advdev_homework_grading as the Git Repo and 'Jenkinsfile' as the Jenkinsfile.
+. Use https://github.com/wkulhanek/advdev_homework_grading as the Git Repo and 'Jenkinsfile-slave' as the Jenkinsfile.
 
 . If this is a shared Jenkins (e.g. on the NA39 GPTE Cluster) allow students to start builds:
 .. Log into Jenkins
