@@ -41,7 +41,7 @@ pipeline {
         name "jnlp"
         image "registry.access.redhat.com/openshift3/jenkins-slave-maven-rhel7:v3.9"
         resourceRequestMemory "2Gi"
-        resourceLimitMemory "4Gi"
+        resourceLimitMemory "2Gi"
         resourceRequestCpu "2"
         resourceLimitCpu "4"
       }
