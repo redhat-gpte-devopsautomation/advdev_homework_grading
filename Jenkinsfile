@@ -32,7 +32,21 @@
 //   and 'Jenkinsfile' as the Jenkinsfile.
 
 pipeline {
-  agent any
+  agent {
+    kubernetes {
+      label "homework"
+      cloud "openshift"
+      inheritFrom "maven"
+      containerTemplate {
+        name "jnlp"
+        image "registry.access.redhat.com/openshift3/jenkins-slave-maven-rhel7:v3.9"
+        resourceRequestMemory "1Gi"
+        resourceLimitMemory "2Gi"
+        resourceRequestCpu "500m"
+        resourceLimitCpu "1"
+      }
+    }
+  }
   stages {
     stage('Get Student Homework Repo') {
       steps {
