@@ -26,11 +26,11 @@ Students can verify that the homework assignment will pass by running the pipeli
 oc new-project gpte-jenkins --description "GPTE Homework Grading Jenkins"
 ----
 
-. Deploy a persistent Jenkins.
+. Deploy a persistent Jenkins (the parameters in JENKINS_OPTS define that Jenkins should start Agent Pods immediately every time a build is started rather than waiting for another build to finish).
 +
 [source,bash]
 ----
-oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi -n gpte-jenkins
+oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=10Gi --param JENKINS_OPTS="-Dhudson.slaves.NodeProvisioner.initialDelay=0" -n gpte-jenkins
 oc set resources dc/jenkins --limits=cpu=2 --requests=memory=2Gi,cpu=2 -n gpte-jenkins
 ----
 +
