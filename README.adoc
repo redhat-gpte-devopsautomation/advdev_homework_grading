@@ -30,7 +30,7 @@ oc new-project gpte-jenkins --description "GPTE Homework Grading Jenkins"
 +
 [source,bash]
 ----
-oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=10Gi --env JENKINS_OPTS="-Dhudson.slaves.NodeProvisioner.initialDelay=0" -n gpte-jenkins
+oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=10Gi --env JENKINS_JAVA_OVERRIDES="-Dhudson.slaves.NodeProvisioner.initialDelay=0 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85" -n gpte-jenkins
 oc set resources dc/jenkins --limits=cpu=2 --requests=memory=2Gi,cpu=2 -n gpte-jenkins
 ----
 +
