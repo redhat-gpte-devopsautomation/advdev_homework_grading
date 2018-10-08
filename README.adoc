@@ -30,8 +30,8 @@ oc new-project gpte-jenkins --description "GPTE Homework Grading Jenkins"
 +
 [source,bash]
 ----
-oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=10Gi --env JENKINS_JAVA_OVERRIDES="-Dhudson.slaves.NodeProvisioner.initialDelay=0 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85" -n gpte-jenkins
-oc set resources dc/jenkins --limits=cpu=2 --requests=memory=2Gi,cpu=2 -n gpte-jenkins
+oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=4Gi --param VOLUME_CAPACITY=10Gi --env JENKINS_JAVA_OVERRIDES="-Dhudson.slaves.NodeProvisioner.initialDelay=0 -Dhudson.slaves.NodeProvisioner.MARGIN=50 -Dhudson.slaves.NodeProvisioner.MARGIN0=0.85" -n gpte-jenkins
+oc set resources dc/jenkins --limits=memory=4Gi,cpu=4 --requests=memory=2Gi,cpu=2 -n gpte-jenkins
 ----
 +
 . Create a custom Cluster-Role and grant it to the `jenkins` service account to annotate projects. Also allow the `jenkins` service account to create projects.
