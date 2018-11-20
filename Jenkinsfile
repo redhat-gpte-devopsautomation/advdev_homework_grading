@@ -117,7 +117,7 @@ pipeline {
     stage('Test Tasks in Dev') {
       steps {
         echo "Testing Tasks Dev Application"
-        script {
+        // script {
           // Test Dev Tasks
           // def devTasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-dev.apps.${CLUSTER}/ws/appname/").trim()
           // echo "Dev Tasks Route: " + devTasksRoute
@@ -128,13 +128,13 @@ pipeline {
           // else {
           //   error("Tasks (Dev) returned unexpected name.")
           // }
-        }
+        // }
       }
     }
     stage('Test Blue Services in Prod') {
       steps {
         echo "Testing Prod Services (BLUE)"
-        script {
+        // script {
           // Test Blue Tasks
           // def tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}/ws/appname/").trim()
           // // Check if the returned string contains "Tasks (Blue)"
@@ -145,7 +145,7 @@ pipeline {
           // else {
           //   error("Tasks (Blue) returned unexpected name.")
           // }
-        }
+        // }
       }
     }
     stage("Second Pipeline Run (from Blue to Green)") {
@@ -157,7 +157,7 @@ pipeline {
     stage('Test Green Parksmap in Prod') {
       steps {
         echo "Testing Prod Parksmap Application (GREEN)"
-        script {
+        // script {
           // Test Blue Tasks
           // def tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}/ws/appname/").trim()
           // // Check if the returned string contains "Tasks (Green)"
@@ -168,7 +168,7 @@ pipeline {
           // else {
           //   error("Tasks (Green) returned unexpected name.")
           // }
-        }
+        // }
       }
     }
     stage('Cleanup') {
