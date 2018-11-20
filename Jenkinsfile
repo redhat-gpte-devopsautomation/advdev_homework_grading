@@ -108,12 +108,10 @@ pipeline {
         sh "./Infrastructure/bin/reset_prod.sh ${GUID}"
       }
     }
-    stage("First Pipeline Runs (from Green to Blue)") {
-      stage('First Pipeline run for Tasks') {
-        steps {
-          echo "Executing Initial Tasks Pipeline - BLUE deployment"
-          sh "oc start-build --wait=true tasks-pipeline -n ${GUID}-jenkins"
-        }
+    stage("First Pipeline Run (from Green to Blue)") {
+      steps {
+        echo "Executing Initial Tasks Pipeline - BLUE deployment"
+        sh "oc start-build --wait=true tasks-pipeline -n ${GUID}-jenkins"
       }
     }
     stage('Test Tasks in Dev') {
@@ -150,13 +148,11 @@ pipeline {
         }
       }
     }
-    stage("Second Pipeline Runs (from Blue to Green)") {
-      stage('Second Pipeline run for Task Service') {
-        steps {
-          echo "Executing Second Tasks Pipeline - GREEN deployment"
-          sh "oc start-build --wait=true tasks-pipeline -n ${GUID}-jenkins"
-        }
-      }   
+    stage("Second Pipeline Run (from Blue to Green)") {
+      steps {
+        echo "Executing Second Tasks Pipeline - GREEN deployment"
+        sh "oc start-build --wait=true tasks-pipeline -n ${GUID}-jenkins"
+      }
     }
     stage('Test Green Parksmap in Prod') {
       steps {
