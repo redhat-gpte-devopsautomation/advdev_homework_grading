@@ -42,8 +42,8 @@ pipeline {
         image "docker-registry.default.svc:5000/gpte-jenkins/jenkins-agent-appdev:latest"
         resourceRequestMemory "1Gi"
         resourceLimitMemory "2Gi"
-        resourceRequestCpu "500m"
-        resourceLimitCpu "1"
+        resourceRequestCpu "1"
+        resourceLimitCpu "2"
       }
     }
   }
@@ -60,7 +60,7 @@ pipeline {
              "*** DELETE:       ${DELETE}\n" +
              "*******************************************************"
 
-        echo "Cloning Infrastructure Project"
+        echo "Cloning Student Project Repository"
         git '${REPO}'
       }
     }
@@ -70,7 +70,7 @@ pipeline {
       }
       steps {
         echo "Creating Projects"
-        sh "./Infrastructure/setup_projects.sh ${GUID} ${USER}"
+        sh "./bin/setup_projects.sh ${GUID} ${USER}"
       }
     }
     stage("Setup Infrastructure") {
@@ -82,36 +82,43 @@ pipeline {
         stage("Setup Jenkins") {
           steps {
             echo "Setting up Jenkins"
-            sh "./Infrastructure/setup_jenkins.sh ${GUID} ${REPO} ${CLUSTER}"
+            sh "./bin/setup_jenkins.sh ${GUID} ${REPO} ${CLUSTER}"
           }
         }
         stage("Setup Development Project") {
           steps {
             echo "Setting up Development Project"
-            sh "./Infrastructure/setup_dev.sh ${GUID}"
+            sh "./bin/setup_dev.sh ${GUID}"
           }
         }
         stage("Setup Production Project") {
           steps {
             echo "Setting up Production Project"
-            sh "./Infrastructure/setup_prod.sh ${GUID}"
+            sh "./bin/setup_prod.sh ${GUID}"
           }
         }
       }
     }
-    stage("Reset Infrastructure") {
+    stage("Reset Projects") {
       failFast true
       when {
         environment name: 'SETUP', value: 'false'
       }
       steps {
-        sh "./Infrastructure/reset_prod.sh ${GUID}"
+        sh "./bin/reset_prod.sh ${GUID}"
       }
     }
     stage("First Pipeline Run (from Green to Blue)") {
       steps {
         echo "Executing Initial Tasks Pipeline - BLUE deployment"
-        sh "oc start-build --wait=true tasks-pipeline -n ${GUID}-jenkins"
+        script {
+          openshift.withCluster() {
+            openshift.withProject("${GUID}-jenkins") {
+              openshift.selector("bc", "tasks-pipeline").startBuild("--wait=true")
+            }
+          }
+        }
+        // sh "oc start-build --wait=true tasks-pipeline -n ${GUID}-jenkins"
       }
     }
     stage('Test Tasks in Dev') {
@@ -151,7 +158,14 @@ pipeline {
     stage("Second Pipeline Run (from Blue to Green)") {
       steps {
         echo "Executing Second Tasks Pipeline - GREEN deployment"
-        sh "oc start-build --wait=true tasks-pipeline -n ${GUID}-jenkins"
+        script {
+          openshift.withCluster() {
+            openshift.withProject("${GUID}-jenkins") {
+              openshift.selector("bc", "tasks-pipeline").startBuild("--wait=true")
+            }
+          }
+        }
+        // sh "oc start-build --wait=true tasks-pipeline -n ${GUID}-jenkins"
       }
     }
     stage('Test Green Parksmap in Prod') {
@@ -177,7 +191,7 @@ pipeline {
       }
       steps {
         echo "Cleanup - deleting all projects for GUID=${GUID}"
-        sh "./Infrastructure/cleanup.sh ${GUID}"
+        sh "./bin/cleanup.sh ${GUID}"
       }
     }
   }
