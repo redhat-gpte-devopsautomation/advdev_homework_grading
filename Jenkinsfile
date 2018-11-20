@@ -70,7 +70,7 @@ pipeline {
       }
       steps {
         echo "Creating Projects"
-        sh "./Infrastructure/bin/setup_projects.sh ${GUID} ${USER}"
+        sh "./Infrastructure/setup_projects.sh ${GUID} ${USER}"
       }
     }
     stage("Setup Infrastructure") {
@@ -82,19 +82,19 @@ pipeline {
         stage("Setup Jenkins") {
           steps {
             echo "Setting up Jenkins"
-            sh "./Infrastructure/bin/setup_jenkins.sh ${GUID} ${REPO} ${CLUSTER}"
+            sh "./Infrastructure/setup_jenkins.sh ${GUID} ${REPO} ${CLUSTER}"
           }
         }
         stage("Setup Development Project") {
           steps {
             echo "Setting up Development Project"
-            sh "./Infrastructure/bin/setup_dev.sh ${GUID}"
+            sh "./Infrastructure/setup_dev.sh ${GUID}"
           }
         }
         stage("Setup Production Project") {
           steps {
             echo "Setting up Production Project"
-            sh "./Infrastructure/bin/setup_prod.sh ${GUID}"
+            sh "./Infrastructure/setup_prod.sh ${GUID}"
           }
         }
       }
@@ -105,7 +105,7 @@ pipeline {
         environment name: 'SETUP', value: 'false'
       }
       steps {
-        sh "./Infrastructure/bin/reset_prod.sh ${GUID}"
+        sh "./Infrastructure/reset_prod.sh ${GUID}"
       }
     }
     stage("First Pipeline Run (from Green to Blue)") {
@@ -177,7 +177,7 @@ pipeline {
       }
       steps {
         echo "Cleanup - deleting all projects for GUID=${GUID}"
-        sh "./Infrastructure/bin/cleanup.sh ${GUID}"
+        sh "./Infrastructure/cleanup.sh ${GUID}"
       }
     }
   }
