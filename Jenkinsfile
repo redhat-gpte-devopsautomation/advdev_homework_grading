@@ -117,35 +117,35 @@ pipeline {
     stage('Test Tasks in Dev') {
       steps {
         echo "Testing Tasks Dev Application"
-        // script {
+        script {
           // Test Dev Tasks
-          // def devTasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-dev.apps.${CLUSTER}/ws/appname/").trim()
-          // echo "Dev Tasks Route: " + devTasksRoute
-          // Check if the returned string contains "Tasks (Dev)"
-          // if (devTasksRoute.contains("Tasks (Dev)")) {
-          //   echo "*** Tasks (Dev) validated successfully."
-          // }
-          // else {
-          //   error("Tasks (Dev) returned unexpected name.")
-          // }
-        // }
+          def devTasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-dev.apps.${CLUSTER}").trim()
+          echo "Dev Tasks Route: " + devTasksRoute
+          // Check if the returned string contains "tasks-dev"
+          if (devTasksRoute.contains("tasks-dev")) {
+            echo "*** tasks-dev validated successfully."
+          }
+          else {
+            error("tasks-dev returned unexpected name.")
+          }
+        }
       }
     }
     stage('Test Blue Services in Prod') {
       steps {
         echo "Testing Prod Services (BLUE)"
-        // script {
+        script {
           // Test Blue Tasks
-          // def tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}/ws/appname/").trim()
-          // // Check if the returned string contains "Tasks (Blue)"
-          // echo "Tasks Route: " + tasksRoute
-          // if (tasksRoute.contains("ParksMap (Blue)")) {
-          //   echo "*** Tasks (Blue) validated successfully."
-          // }
-          // else {
-          //   error("Tasks (Blue) returned unexpected name.")
-          // }
-        // }
+          def tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}").trim()
+          // // Check if the returned string contains "tasks-blue"
+          echo "Tasks Route: " + tasksRoute
+          if (tasksRoute.contains("tasks-blue")) {
+            echo "*** tasks-blue validated successfully."
+          }
+          else {
+            error("tasks-blue returned unexpected name.")
+          }
+        }
       }
     }
     stage("Second Pipeline Run (from Blue to Green)") {
@@ -157,18 +157,18 @@ pipeline {
     stage('Test Green Parksmap in Prod') {
       steps {
         echo "Testing Prod Parksmap Application (GREEN)"
-        // script {
+        script {
           // Test Blue Tasks
-          // def tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}/ws/appname/").trim()
-          // // Check if the returned string contains "Tasks (Green)"
-          // echo "Tasks Route: " + tasksRoute
-          // if (tasksRoute.contains("ParksMap (Green)")) {
-          //   echo "*** Tasks (Green) validated successfully."
-          // }
-          // else {
-          //   error("Tasks (Green) returned unexpected name.")
-          // }
-        // }
+          def tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}").trim()
+          // // Check if the returned string contains "tasks-green"
+          echo "Tasks Route: " + tasksRoute
+          if (tasksRoute.contains("tasks-green")) {
+            echo "*** tasks-green validated successfully."
+          }
+          else {
+            error("tasks-green returned unexpected name.")
+          }
+        }
       }
     }
     stage('Cleanup') {
