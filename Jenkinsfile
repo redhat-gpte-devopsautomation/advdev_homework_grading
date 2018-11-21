@@ -28,7 +28,7 @@
 //   - DELETE (type Boolean): Default: true
 //                            If true will delete all created projects
 //                            after a successful run.
-// * Use https://github.com/wkulhanek/advdev_homework_grading as the Git Repo
+// * Use https://github.com/redhat-gpte-devopsautomation/advdev_homework_grading as the Git Repo
 //   and 'Jenkinsfile' as the Jenkinsfile.
 
 pipeline {
@@ -118,22 +118,19 @@ pipeline {
             }
           }
         }
-        // sh "oc start-build --wait=true tasks-pipeline -n ${GUID}-jenkins"
       }
     }
     stage('Test Tasks in Dev') {
       steps {
         echo "Testing Tasks Dev Application"
         script {
-          // Test Dev Tasks
           def devTasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-dev.apps.${CLUSTER}").trim()
-          echo "Dev Tasks Route: " + devTasksRoute
           // Check if the returned string contains "tasks-dev"
           if (devTasksRoute.contains("tasks-dev")) {
             echo "*** tasks-dev validated successfully."
           }
           else {
-            error("tasks-dev returned unexpected name.")
+            error("*** tasks-dev returned unexpected name.")
           }
         }
       }
@@ -142,15 +139,13 @@ pipeline {
       steps {
         echo "Testing Prod Services (BLUE)"
         script {
-          // Test Blue Tasks
           def tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}").trim()
-          // // Check if the returned string contains "tasks-blue"
-          echo "Tasks Route: " + tasksRoute
+          // Check if the returned string contains "tasks-blue"
           if (tasksRoute.contains("tasks-blue")) {
             echo "*** tasks-blue validated successfully."
           }
           else {
-            error("tasks-blue returned unexpected name.")
+            error("*** tasks-blue returned unexpected name.")
           }
         }
       }
@@ -165,22 +160,19 @@ pipeline {
             }
           }
         }
-        // sh "oc start-build --wait=true tasks-pipeline -n ${GUID}-jenkins"
       }
     }
     stage('Test Green Parksmap in Prod') {
       steps {
         echo "Testing Prod Parksmap Application (GREEN)"
         script {
-          // Test Blue Tasks
           def tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}").trim()
-          // // Check if the returned string contains "tasks-green"
-          echo "Tasks Route: " + tasksRoute
+          // Check if the returned string contains "tasks-green"
           if (tasksRoute.contains("tasks-green")) {
             echo "*** tasks-green validated successfully."
           }
           else {
-            error("tasks-green returned unexpected name.")
+            error("*** tasks-green returned unexpected name.")
           }
         }
       }
