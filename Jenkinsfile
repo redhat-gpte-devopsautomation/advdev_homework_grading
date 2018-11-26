@@ -28,7 +28,7 @@
 //   - DELETE (type Boolean): Default: true
 //                            If true will delete all created projects
 //                            after a successful run.
-// * Use https://github.com/wkulhanek/advdev_homework_grading as the Git Repo
+// * Use https://github.com/redhat-gpte-devopsautomation/advdev_homework_grading as the Git Repo
 //   and 'Jenkinsfile' as the Jenkinsfile.
 
 pipeline {
@@ -39,11 +39,11 @@ pipeline {
       inheritFrom "maven"
       containerTemplate {
         name "jnlp"
-        image "registry.access.redhat.com/openshift3/jenkins-slave-maven-rhel7:v3.9"
+        image "docker-registry.default.svc:5000/gpte-jenkins/jenkins-agent-appdev:latest"
         resourceRequestMemory "1Gi"
         resourceLimitMemory "2Gi"
-        resourceRequestCpu "500m"
-        resourceLimitCpu "1"
+        resourceRequestCpu "1"
+        resourceLimitCpu "2"
       }
     }
   }
@@ -60,7 +60,7 @@ pipeline {
              "*** DELETE:       ${DELETE}\n" +
              "*******************************************************"
 
-        echo "Cloning Infrastructure Project"
+        echo "Cloning Student Project Repository"
         git '${REPO}'
       }
     }
@@ -70,7 +70,7 @@ pipeline {
       }
       steps {
         echo "Creating Projects"
-        sh "./Infrastructure/bin/setup_projects.sh ${GUID} ${USER}"
+        sh "./bin/setup_projects.sh ${GUID} ${USER} true"
       }
     }
     stage("Setup Infrastructure") {
@@ -79,104 +79,58 @@ pipeline {
         environment name: 'SETUP', value: 'true'
       }
       parallel {
-        stage("Setup Nexus") {
-          steps {
-            echo "Setting up Nexus"
-            sh "./Infrastructure/bin/setup_nexus.sh ${GUID}"
-          }
-        }
-        stage("Setup Sonarqube") {
-          steps {
-            echo "Setting up Sonarqube"
-            sh "./Infrastructure/bin/setup_sonar.sh ${GUID}"
-          }
-        }
         stage("Setup Jenkins") {
           steps {
             echo "Setting up Jenkins"
-            sh "./Infrastructure/bin/setup_jenkins.sh ${GUID} ${REPO} ${CLUSTER}"
+            sh "./bin/setup_jenkins.sh ${GUID} ${REPO} ${CLUSTER}"
           }
         }
         stage("Setup Development Project") {
           steps {
             echo "Setting up Development Project"
-            sh "./Infrastructure/bin/setup_dev.sh ${GUID}"
+            sh "./bin/setup_dev.sh ${GUID}"
           }
         }
         stage("Setup Production Project") {
           steps {
             echo "Setting up Production Project"
-            sh "./Infrastructure/bin/setup_prod.sh ${GUID}"
+            sh "./bin/setup_prod.sh ${GUID}"
           }
         }
       }
     }
-    stage("Reset Infrastructure") {
+    stage("Reset Projects") {
       failFast true
       when {
         environment name: 'SETUP', value: 'false'
       }
       steps {
-        sh "./Infrastructure/bin/reset_prod.sh ${GUID}"
+        sh "./bin/reset_prod.sh ${GUID}"
       }
     }
-    stage("First Pipeline Runs (from Green to Blue)") {
-      failFast true
-      parallel {
-        stage('First Pipeline run for Nationalparks Service') {
-          steps {
-            echo "Executing Initial Nationalparks Pipeline - BLUE deployment"
-            sh "oc start-build --wait=true nationalparks-pipeline -n ${GUID}-jenkins"
-          }
-        }
-        stage('First Pipeline run for MLBParks Service') {
-          steps {
-            echo "Executing Initial MLBParks Pipeline - BLUE deployment"
-            sh "oc start-build --wait=true mlbparks-pipeline -n ${GUID}-jenkins"
-          }
-        }
-        stage('First Pipeline run for ParksMap Service') {
-          steps {
-            echo "Executing Initial ParksMap Pipeline - BLUE deployment"
-            sh "oc start-build --wait=true parksmap-pipeline -n ${GUID}-jenkins"
-          }
-        }
-      }
-    }
-    stage('Test Parksmap in Dev') {
+    stage("First Pipeline Run (from Green to Blue)") {
       steps {
-        echo "Testing Parksmap Dev Application"
+        echo "Executing Initial Tasks Pipeline - BLUE deployment"
         script {
-          // Test Dev Nationalparks
-          def devNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks.${GUID}-parks-dev.svc.cluster.local:8080/ws/info/").trim()
-          echo "Dev National Parks Service: " + devNationalParksSvc
-          // Check if the returned string contains "National Parks (Dev)"
-          if (devNationalParksSvc.contains("National Parks (Dev)")) {
-            echo "*** National Parks (Dev) validated successfully."
+          openshift.withCluster() {
+            openshift.withProject("${GUID}-jenkins") {
+              openshift.selector("bc", "tasks-pipeline").startBuild("--wait=true")
+            }
+          }
+        }
+      }
+    }
+    stage('Test Tasks in Dev') {
+      steps {
+        echo "Testing Tasks Dev Application"
+        script {
+          def devTasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-dev.apps.${CLUSTER}").trim()
+          // Check if the returned string contains "tasks-dev"
+          if (devTasksRoute.contains("tasks-dev")) {
+            echo "*** tasks-dev validated successfully."
           }
           else {
-            error("National Parks (Dev) returned unexpected name.")
-          }
-
-          // Test Dev MLBParks
-          def devMLBParksSvc = sh(returnStdout: true, script: "curl mlbparks.${GUID}-parks-dev.svc.cluster.local:8080/ws/info/").trim()
-          echo "Dev MLB Parks Service: " + devMLBParksSvc
-          // Check if the returned string contains "MLB Parks (Dev)"
-          if (devMLBParksSvc.contains("MLB Parks (Dev)")) {
-            echo "*** MLB Parks (Dev) validated successfully."
-          }
-          else {
-            error("MLBParks (Dev) returned unexpected name.")
-          }
-          // Test Dev ParksMap
-          def devParksMapRoute = sh(returnStdout: true, script: "curl parksmap-${GUID}-parks-dev.apps.${CLUSTER}/ws/appname/").trim()
-          echo "Dev ParksMap Route: " + devParksMapRoute
-          // Check if the returned string contains "Parks Map (Dev)"
-          if (devParksMapRoute.contains("ParksMap (Dev)")) {
-            echo "*** Parks Map (Dev) validated successfully."
-          }
-          else {
-            error("ParksMap (Dev) returned unexpected name.")
+            error("*** tasks-dev returned unexpected name.")
           }
         }
       }
@@ -185,60 +139,25 @@ pipeline {
       steps {
         echo "Testing Prod Services (BLUE)"
         script {
-          // Test Blue Nationalparks:
-          def blueNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks-blue.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
-          // Check if the returned string contains "National Parks (Blue)"
-          echo "Blue National Parks Service: " + blueNationalParksSvc
-          if (blueNationalParksSvc.contains("National Parks (Blue)")) {
-            echo "*** National Parks (Blue) validated successfully."
+          def tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}").trim()
+          // Check if the returned string contains "tasks-blue"
+          if (tasksRoute.contains("tasks-blue")) {
+            echo "*** tasks-blue validated successfully."
           }
           else {
-            error("National Parks (Blue) returned unexpected name.")
-          }
-
-          // Test Blue MLBParks:
-          def blueMLBParksSvc = sh(returnStdout: true, script: "curl mlbparks-blue.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
-          // Check if the returned string contains "MLB Parks (Blue)"
-          echo "Blue MLB Parks Service: " + blueMLBParksSvc
-          if (blueMLBParksSvc.contains("MLB Parks (Blue)")) {
-            echo "*** MLB Parks (Blue) validated successfully."
-          }
-          else {
-            error("MLB Parks (Blue) returned unexpected name.")
-          }
-
-          // Test Blue ParksMap
-          def parksMapRoute = sh(returnStdout: true, script: "curl parksmap-${GUID}-parks-prod.apps.${CLUSTER}/ws/appname/").trim()
-          // Check if the returned string contains "Parks Map (Blue)"
-          echo "ParksMap Route: " + parksMapRoute
-          if (parksMapRoute.contains("ParksMap (Blue)")) {
-            echo "*** ParksMap (Blue) validated successfully."
-          }
-          else {
-            error("ParksMap (Blue) returned unexpected name.")
+            error("*** tasks-blue returned unexpected name.")
           }
         }
       }
     }
-    stage("Second Pipeline Runs (from Blue to Green)") {
-      failFast true
-      parallel {
-        stage('Second Pipeline run for Nationalparks Service') {
-          steps {
-            echo "Executing Second Nationalparks Pipeline - GREEN deployment"
-            sh "oc start-build --wait=true nationalparks-pipeline -n ${GUID}-jenkins"
-          }
-        }
-        stage('Second Pipeline run for National Parks Service') {
-          steps {
-            echo "Executing Second National Parks Pipeline - GREEN deployment"
-            sh "oc start-build --wait=true mlbparks-pipeline -n ${GUID}-jenkins"
-          }
-        }
-        stage('Second Pipeline run for ParksMap Service') {
-          steps {
-            echo "Executing Second ParksMap Pipeline - GREEN deployment"
-            sh "oc start-build --wait=true parksmap-pipeline -n ${GUID}-jenkins"
+    stage("Second Pipeline Run (from Blue to Green)") {
+      steps {
+        echo "Executing Second Tasks Pipeline - GREEN deployment"
+        script {
+          openshift.withCluster() {
+            openshift.withProject("${GUID}-jenkins") {
+              openshift.selector("bc", "tasks-pipeline").startBuild("--wait=true")
+            }
           }
         }
       }
@@ -247,37 +166,13 @@ pipeline {
       steps {
         echo "Testing Prod Parksmap Application (GREEN)"
         script {
-          // Test Green Nationalparks:
-          def greenNationalParksSvc = sh(returnStdout: true, script: "curl nationalparks-green.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
-          // Check if the returned string contains "National Parks (Green)"
-          echo "Green National Parks Service: " + greenNationalParksSvc
-          if (greenNationalParksSvc.contains("National Parks (Green)")) {
-            echo "*** National Parks (Green) validated successfully."
+          def tasksRoute = sh(returnStdout: true, script: "curl tasks-${GUID}-tasks-prod.apps.${CLUSTER}").trim()
+          // Check if the returned string contains "tasks-green"
+          if (tasksRoute.contains("tasks-green")) {
+            echo "*** tasks-green validated successfully."
           }
           else {
-            error("National Parks (Green) returned unexpected name.")
-          }
-
-          // Test Green MLBParks:
-          def greenMLBParksSvc = sh(returnStdout: true, script: "curl mlbparks-green.${GUID}-parks-prod.svc.cluster.local:8080/ws/info/").trim()
-          // Check if the returned string contains "MLB Parks (Blue)"
-          echo "Green MLB Parks Service: " + greenMLBParksSvc
-          if (greenMLBParksSvc.contains("MLB Parks (Green)")) {
-            echo "*** MLB Parks (Green) validated successfully."
-          }
-          else {
-            error("MLB Parks (Green) returned unexpected name.")
-          }
-
-          // Test ParksMap
-          def parksMapRoute = sh(returnStdout: true, script: "curl parksmap-${GUID}-parks-prod.apps.${CLUSTER}/ws/appname/").trim()
-          // Check if the returned string contains "Parks Map (Green)"
-          echo "ParksMap Route: " + parksMapRoute
-          if (parksMapRoute.contains("ParksMap (Green)")) {
-            echo "*** ParksMap (Green) validated successfully."
-          }
-          else {
-            error("ParksMap (Green) returned unexpected name.")
+            error("*** tasks-green returned unexpected name.")
           }
         }
       }
@@ -288,7 +183,7 @@ pipeline {
       }
       steps {
         echo "Cleanup - deleting all projects for GUID=${GUID}"
-        sh "./Infrastructure/bin/cleanup.sh ${GUID}"
+        sh "./bin/cleanup.sh ${GUID}"
       }
     }
   }
