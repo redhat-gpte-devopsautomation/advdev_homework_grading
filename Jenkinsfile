@@ -54,7 +54,7 @@ pipeline {
              "*** Advanced OpenShift Development Homework Grading ***\n" +
              "*** GUID:         ${GUID}\n" +
              "*** USER:         ${USER}\n" +
-             "*** Student Repo: ${REPO}\n" +
+             "*** Student Repo: *********\n" +
              "*** CLUSTER:      ${CLUSTER}\n" +
              "*** SETUP:        ${SETUP}\n" +
              "*** DELETE:       ${DELETE}\n" +
