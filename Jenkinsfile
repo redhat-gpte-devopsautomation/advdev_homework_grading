@@ -111,14 +111,13 @@ pipeline {
     stage("First Pipeline Run (from Green to Blue)") {
       steps {
         echo "Executing Initial Tasks Pipeline - BLUE deployment"
-        sh "oc start-build tasks-pipeline --wait=true -n ${GUID}-jenkins"
-        // script {
-        //   openshift.withCluster() {
-        //     openshift.withProject("${GUID}-jenkins") {
-        //       openshift.selector("bc", "tasks-pipeline").startBuild("--wait=true")
-        //     }
-        //   }
-        // }
+        script {
+          openshift.withCluster() {
+            openshift.withProject("${GUID}-jenkins") {
+              openshift.selector("bc", "tasks-pipeline").startBuild("--wait=true")
+            }
+          }
+        }
       }
     }
     stage('Test Tasks in Dev') {
