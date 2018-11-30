@@ -6,7 +6,7 @@ The automatic grading process requires a public student repository on a Git comp
 
 == Student Repository Structure
 
-A skeleton student repository is provided at https://github.com/wkulhanek/advdev_homework_template.
+A skeleton student repository is provided at https://github.com/redhat-gpte-devopsautomation/advdev_homework_template.
 
 See the homework assignment lab on instructions what to implement. Also see the README files in the skeleton repo (and it's three service subdirectories) on how to build and deploy the applications.
 
@@ -66,9 +66,9 @@ oc run restartjenkins --schedule="0 23 * * *" --restart=OnFailure -n gpte-jenkin
 |*DELETE*|Boolean|Default: true, If *true* will delete all created projects after a successful run.
 |====
 +
-. Use `https://github.com/wkulhanek/advdev_homework_grading` as the Git Repo and `Jenkinsfile` as the Jenkinsfile.
+. Use `https://github.com/redhat-gpte-devopsautomation/advdev_homework_grading` as the Git Repo and `Jenkinsfile` as the Jenkinsfile.
 
-. If this is a shared Jenkins (e.g. on the NA39 GPTE Cluster) allow students to start builds:
+. If this is a shared Jenkins (e.g. on the NA311 GPTE Cluster) allow students to start builds:
 .. Log into Jenkins
 .. Navigate to *Manage Jenkins* -> *Configure Global Security*
 .. Leave *Matrix based security* and check the checkboxes under *Job* to allow *authenticated users* to *Build* and *Cancel* builds.
