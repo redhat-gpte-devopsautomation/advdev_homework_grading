@@ -118,7 +118,7 @@ pipeline {
         //       openshift.selector("bc", "tasks-pipeline").startBuild("--wait=true")
         //     }
         //   }
-        }
+        // }
       }
     }
     stage('Test Tasks in Dev') {
