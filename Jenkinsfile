@@ -12,7 +12,7 @@
 // * Create a persistent Jenkins in a separate project (e.g. gpte-jenkins)
 //
 // * Add self-provisioner role to the service account jenkins
-//   oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins 
+//   oc adm policy add-cluster-role-to-user self-provisioner system:serviceaccount:gpte-jenkins:jenkins
 //
 // * Create an Item of type Pipeline (Use name "HomeworkGrading")
 // * Create Five Parameters:
@@ -62,6 +62,7 @@ pipeline {
 
         echo "Cloning Student Project Repository"
         git '${REPO}'
+        sh "chmod +x ./bin/*.sh"
       }
     }
     stage("Create Projects") {
